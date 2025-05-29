@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'docker:24.0-cli'  // клиент Docker v24
-            //image 'benhall/dind-jenkins-agent:v2'
+            //image 'docker:24.0-cli'  // клиент Docker v24
+            image 'benhall/dind-jenkins-agent:v2'
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
