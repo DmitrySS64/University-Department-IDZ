@@ -17,8 +17,6 @@ build/
 .cache/
 .next/
 .vite/
-vite.config.ts
-vite.config.js
 
 # === Webstorm / JetBrains IDEs ===
 .idea/
