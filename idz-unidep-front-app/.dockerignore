@@ -1,0 +1,42 @@
+# Node modules and dependencies
+node_modules
+bower_components
+
+# Build output
+dist
+build
+
+# Logs
+npm-debug.log
+yarn-debug.log
+pnpm-debug.log
+*.log
+
+# dotenv files
+.env
+.env.*.local
+
+# Vite cache
+.vite
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE/editor configs
+.vscode
+.idea
+
+# Git
+.git
+.gitignore
+
+# Docker files you don’t want copied in
+docker-compose.*
+Dockerfile*
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Test coverage
+coverage
