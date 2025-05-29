@@ -18,15 +18,15 @@ services:
       DB_NAME: ${POSTGRES_DB}
     expose:
       - 3000
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
-    depends_on:
-      - frontend
-      - backend
+  #nginx:
+  #  build:
+  #    context: ./nginx
+  #    dockerfile: Dockerfile
+  #  ports:
+  #    - "80:80"
+  #  depends_on:
+  #    - frontend
+  #    - backend
   db:
     image: postgres:latest
     container_name: my_postgres
