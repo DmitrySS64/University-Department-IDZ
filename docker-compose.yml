@@ -1,6 +1,32 @@
 version: "3.8"
 
 services:
+  frontend:
+    image: idz-unidep-front:1.0
+    build:
+      context: ./idz-unidep-front-app
+      dockerfile: Dockerfile
+  backend:
+    build:
+      context: ./idz-unidep-back-app
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+    expose:
+      - 3000
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
   db:
     image: postgres:latest
     container_name: my_postgres
@@ -24,7 +50,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "5050:80"
+      - "80"
     depends_on:
       - db
 volumes:
