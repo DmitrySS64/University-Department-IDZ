@@ -51,8 +51,12 @@ pipeline {
                     sh """
                         echo "🏷️ Тэггирование и пуш"
                         docker login -u ${NEXUS_USER} -p ${NEXUS_PASS} ${REGISTRY}
+
                         docker tag ${IMAGE_NAME_FRONT} ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
                         docker push ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
+
+                        docker tag ${IMAGE_NAME_BACK} ${REGISTRY}/${IMAGE_NAME_BACK}:${IMAGE_TAG}
+                        docker push ${REGISTRY}/${IMAGE_NAME_BACK}:${IMAGE_TAG}
                     """
                 }
             }
