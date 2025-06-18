@@ -13,7 +13,7 @@ RUN npm run build
 #WORKDIR /dist
 #COPY --from=build /app/dist .
 
-FROM nginx:latest
+FROM nginx:stable-alpine
 
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY --from=frontend_artifacts /app/dist /usr/share/nginx/html

@@ -1,0 +1,27 @@
+.card-style{
+  background-color: var(--color-grey-100);
+  user-select: none;
+  padding: 10px 20px;
+}
+
+.card-style span{
+  font-size: 14px;
+  color: var(--color-grey-600);
+  font-weight: bold;
+  line-height: 16px;
+}
+
+.card-style h5 {
+  font-size: 18px;
+  color: black;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.card-style:hover{
+  background-color: var(--color-grey-200);
+}
+
+.card-style:active{
+  background-color: var(--color-grey-300);
+}

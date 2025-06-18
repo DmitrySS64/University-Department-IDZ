@@ -1,29 +1,24 @@
-version: "3.8"
-
 services:
   frontend:
-    image: idz-unidep-front
+    #image: idz-unidep-front
+    build:
+      context: ./idz-unidep-front-app
+      dockerfile: Dockerfile
+    container_name: app-frontend
     ports:
-      - "8080:8080"
-    build:
-      context: .
-      dockerfile: Dockerfile
+      - "80:80"
+    depends_on:
+      - backend
     restart: always
-    volumes:
-      - "./nginx/nginx.conf://etc/nginx/nginx.conf:ro"
   backend:
-    image: idz-unidep-back
+    #image: idz-unidep-back
     build:
-      context: ./idz-unidep-back-app
+      context: ./FastApi
       dockerfile: Dockerfile
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER}
-      DB_PASS: ${POSTGRES_PASSWORD}
-      DB_NAME: ${POSTGRES_DB}
-    expose:
-      - 3000
+    container_name: app-backend
+    ports: "8000:8000"
+    volumes: -./backend:/app
+    restart: always
   #nginx:
   #  build:
   #    context: ./nginx
@@ -33,31 +28,47 @@ services:
   #  depends_on:
   #    - frontend
   #    - backend
-  db:
-    image: postgres:latest
-    container_name: my_postgres
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./db/test-data:/docker-entrypoint-initdb.d/test-data.sql
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "80"
-    depends_on:
-      - db
-volumes:
-  pgdata:
+  #db:
+  #  image: postgres:latest
+  #  container_name: my_postgres
+  #  restart: always
+  #  ports:
+  #    - "5432:5432"
+  #  networks:
+  #    my_network:
+  #      ipv4_address: 192.168.100.10
+  #  environment:
+  #    POSTGRES_DB: ${POSTGRES_DB}
+  #    POSTGRES_USER: ${POSTGRES_USER}
+  #    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #  volumes:
+  #    - pgdata:/var/lib/postgresql/data
+  #    - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #    - ./db/test-data:/docker-entrypoint-initdb.d/test-data.sql
+  #pgadmin:
+  #  image: dpage/pgadmin4
+  #  container_name: pgadmin
+  #  restart: always
+  #  environment:
+  #    PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #    PGADMIN_DEFAULT_PASSWORD: admin
+  #  ports:
+  #    - "8082:80"
+  #  depends_on:
+  #    - db
+  #fastapi:
+  #  build:
+  #    context: ./FastApi
+  #    dockerfile: Dockerfile
+  #  ports:
+  #    - "8000:8000"
+  #  volumes:
+  #    - dbdata:/app/db
+  #volumes:
+  #  pgdata: #dbdata:
+  #networks:
+  #  my_network:
+  #    ipam:
+  #      driver: bridge
+  #      config:
+  #        - subnet: 192.168.100.0/24

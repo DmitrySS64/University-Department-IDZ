@@ -6,7 +6,9 @@ const HeaderLayout = () => {
     return (
         <>
             <NavbarCustom/>
-            <Outlet/>
+            <div className="container" style={{height: 'calc(100% - 56px)'}}>
+                <Outlet/>
+            </div>
         </>
     )
 }
