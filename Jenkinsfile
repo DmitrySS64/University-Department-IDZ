@@ -30,10 +30,8 @@ pipeline {
             steps {
                 script {
                     sh """
-			echo 'Останавливаем предыдущие контейнеры'
-                    	docker compose down
 
-			echo 'Сборка контейнеров'
+                    	docker compose down
                     	docker compose build
                     """
                 }
@@ -51,7 +49,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: {NEXUS_CREDENTIALS_ID}, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh """
-			echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin
+			            echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin 
 			
                         echo "🏷️ Тэггирование и пуш"
                         docker tag ${IMAGE_NAME_FRONT} ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
