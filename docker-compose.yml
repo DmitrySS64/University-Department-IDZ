@@ -16,7 +16,8 @@ services:
       context: ./FastApi
       dockerfile: Dockerfile
     container_name: app-backend
-    ports: "8000:8000"
+    ports:
+      - "8000:8000"
     volumes: -./backend:/app
     restart: always
   #nginx:
