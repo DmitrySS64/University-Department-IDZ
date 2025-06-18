@@ -11,12 +11,12 @@ pipeline {
         REGISTRY = "localhost:8083"
         IMAGE_NAME_FRONT = "idz-unidep-front"
         IMAGE_NAME_BACK = "idz-unidep-back"
-        IMAGE_NAME_NGINX = "idz-unidep-nginx"
-        IMAGE_NAME_DB = "idz-unidep-db"
+        //IMAGE_NAME_NGINX = "idz-unidep-nginx"
+        //IMAGE_NAME_DB = "idz-unidep-db"
         IMAGE_TAG = "latest"
         NEXUS_CREDENTIALS_ID = "4c48b307-fbd3-482e-8739-3259c173d9f4"
-        NEXUS_USER = "jenkins"
-        NEXUS_PASS = "jenkins"
+        //NEXUS_USER = "jenkins"
+        //NEXUS_PASS = "jenkins"
     }
 
     stages {
@@ -30,9 +30,11 @@ pipeline {
             steps {
                 script {
                     sh """
-                    docker compose down
-                    docker compose build
-                    docker compose up -d
+			echo 'Останавливаем предыдущие контейнеры'
+                    	docker compose down
+
+			echo 'Сборка контейнеров'
+                    	docker compose build
                     """
                 }
             }
@@ -49,9 +51,9 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: {NEXUS_CREDENTIALS_ID}, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh """
+			echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin
+			
                         echo "🏷️ Тэггирование и пуш"
-                        docker login -u ${NEXUS_USER} -p ${NEXUS_PASS} ${REGISTRY}
-
                         docker tag ${IMAGE_NAME_FRONT} ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
                         docker push ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
 
