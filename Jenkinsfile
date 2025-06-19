@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'docker:24.0-cli'  // клиент Docker v24
-            //image 'benhall/dind-jenkins-agent:v2'
-        }
-    }
+    agent any
 
     environment {
         REGISTRY = "localhost:8083"
