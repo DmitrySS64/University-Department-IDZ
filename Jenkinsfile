@@ -50,7 +50,7 @@ pipeline {
 
         stage('Tag & Push to Nexus') {
             steps {
-                withCredentials([usernamePassword(credentialsId: {NEXUS_CREDENTIALS_ID}, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: NEXUS_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh """
 			            echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin 
 			
