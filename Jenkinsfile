@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        REGISTRY = "localhost:8083"
+        REGISTRY = "http://nexus:8083"
         IMAGE_NAME_FRONT = "idz-unidep-front"
         IMAGE_NAME_BACK = "idz-unidep-back"
         //IMAGE_NAME_NGINX = "idz-unidep-nginx"
