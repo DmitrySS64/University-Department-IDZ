@@ -8,15 +8,13 @@ pipeline {
     }
 
     environment {
-        REGISTRY = "localhost:8083"
+        REGISTRY = "nexus:8083"
         IMAGE_NAME_FRONT = "idz-unidep-front"
         IMAGE_NAME_BACK = "idz-unidep-back"
         //IMAGE_NAME_NGINX = "idz-unidep-nginx"
         //IMAGE_NAME_DB = "idz-unidep-db"
         IMAGE_TAG = "latest"
         NEXUS_CREDENTIALS_ID = "4c48b307-fbd3-482e-8739-3259c173d9f4"
-        //NEXUS_USER = "jenkins"
-        //NEXUS_PASS = "jenkins"
     }
 
     stages {
@@ -30,8 +28,6 @@ pipeline {
             steps {
                 script {
                     sh """
-
-                    	docker compose down
                     	docker compose build
                     """
                 }
@@ -42,6 +38,13 @@ pipeline {
             steps {
                 echo '🧪 Run tests here (currently empty)...'
                 // Add test commands when needed
+                script {
+                    sh """
+                        docker compose up -d
+
+                        docker compose down
+                    """
+                }
             }
         }
 
@@ -51,7 +54,6 @@ pipeline {
                     sh """
 			            echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin 
 			
-                        echo "🏷️ Тэггирование и пуш"
                         docker tag ${IMAGE_NAME_FRONT} ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
                         docker push ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
 
