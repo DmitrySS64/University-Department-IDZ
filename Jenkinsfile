@@ -8,13 +8,13 @@ pipeline {
     }
 
     environment {
-        REGISTRY = "172.20.0.2:8083"
+        REGISTRY = "localhost:8083"
         IMAGE_NAME_FRONT = "idz-unidep-front"
         IMAGE_NAME_BACK = "idz-unidep-back"
         //IMAGE_NAME_NGINX = "idz-unidep-nginx"
         //IMAGE_NAME_DB = "idz-unidep-db"
         IMAGE_TAG = "latest"
-        NEXUS_CREDENTIALS_ID = '4c48b307-fbd3-482e-8739-3259c173d9f4'
+        NEXUS_CREDENTIALS_ID = 'nexus_jenkins'
     }
 
     stages {
@@ -49,9 +49,8 @@ pipeline {
         stage('Tag & Push to Nexus') {
             steps {
                 script {
-                    def nexusCredsId = '4c48b307-fbd3-482e-8739-3259c173d9f4'
                     withCredentials([
-                        usernamePassword(credentialsId: nexusCredsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
+                        usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
                     ]) {
                         //echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin 
                     sh """
