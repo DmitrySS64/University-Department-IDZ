@@ -52,7 +52,7 @@ pipeline {
             steps {
                 withCredentials([
                     usernamePassword(
-                        credentialsId: "${NEXUS_CREDENTIALS_ID}", 
+                        credentialsId: '4c48b307-fbd3-482e-8739-3259c173d9f4', 
                         usernameVariable: 'USERNAME', 
                         passwordVariable: 'PASSWORD'
                     )
