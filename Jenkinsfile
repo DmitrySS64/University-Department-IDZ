@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        REGISTRY = "nexus:8083"
+        REGISTRY = "localhost:8083"
         IMAGE_NAME_FRONT = "idz-unidep-front"
         IMAGE_NAME_BACK = "idz-unidep-back"
         //IMAGE_NAME_NGINX = "idz-unidep-nginx"
@@ -27,9 +27,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh """
-                    	docker compose build
-                    """
+                    sh "docker compose build"
                 }
             }
         }
@@ -55,9 +53,8 @@ pipeline {
                     withCredentials([
                         usernamePassword(credentialsId: nexusCredsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
                     ]) {
+                        //echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin 
                     sh """
-			            echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin 
-			
                         docker tag ${IMAGE_NAME_FRONT} ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
                         docker push ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
 

@@ -1,6 +1,6 @@
 services:
   frontend:
-    #image: idz-unidep-front
+    image: idz-unidep-front
     build:
       context: ./idz-unidep-front-app
       dockerfile: Dockerfile
@@ -11,7 +11,7 @@ services:
       - backend
     restart: always
   backend:
-    #image: idz-unidep-back
+    image: idz-unidep-back
     build:
       context: ./FastApi
       dockerfile: Dockerfile
