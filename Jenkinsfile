@@ -38,21 +38,24 @@ pipeline {
             }
         }
         stage('SonarQube Analysis') {
-            environment {
-                scannerHome = tool "${SONARSCANNER}"
-            }
             parallel {
                 stage('Backend Analysis') {
+                    environment {
+                        scannerHome = tool "${SONARSCANNER}"
+                    }
                     steps {
                         withSonarQubeEnv(installationName: 'sonarqube') {
                             dir('FastApi') {
-                                sh "${SONARSCANNER}/bin/sonar-scanner sonar-scanner -Dproject.settings=../sonar-project.backend.properties"
+                                sh "${SONARSCANNER}/bin/sonar-scanner -Dproject.settings=../sonar-project.backend.properties"
                             }
                         }
                     }
                 }
 
                 stage('Frontend Analysis') {
+                    environment {
+                        scannerHome = tool "${SONARSCANNER}"
+                    }
                     steps {
                         withSonarQubeEnv(installationName: "${SONARQUBE_SERVER}") {
                             dir('idz-unidep-front-app') {
@@ -145,27 +148,34 @@ pipeline {
     post {
         failure {
             script {
-                def msg = "❌ Jenkins pipeline failed in *${env.STAGE_NAME}* (${env.BRANCH_NAME})"
-                sh '''
-                    curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
-                        -d chat_id=${TELEGRAM_CHAT_ID} \\
-                        -d parse_mode=Markdown \\
-                        -d text="${msg}"
-                '''
+                def stage = env.STAGE_NAME ?: 'Unknown'
+                def msg = "❌ Jenkins pipeline failed in *${stage}* (branch: ${env.BRANCH_NAME})"
+                if (msg?.trim()) {
+                    sh """
+                        curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
+                            -d chat_id=${TELEGRAM_CHAT_ID} \\
+                            -d parse_mode=Markdown \\
+                            -d text="${msg}"
+                    """
+                } else {
+                    echo "⚠️ Telegram message text is empty. Not sending."
+                }
+                echo '❌ Build or push failed.'
             }
-            echo '❌ Build or push failed.'
         }
         success {
             script {
                 def msg = "✅ Jenkins pipeline completed successfully for ${env.BRANCH_NAME}"
-                sh '''
-                    curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
-                        -d chat_id=${TELEGRAM_CHAT_ID} \\
-                        -d parse_mode=Markdown \\
-                        -d text="${msg}"
-                '''
+                if (msg?.trim()) {
+                    sh """
+                        curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
+                            -d chat_id=${TELEGRAM_CHAT_ID} \\
+                            -d parse_mode=Markdown \\
+                            -d text="${msg}"
+                    """
+                }
+                echo "✅ Pipeline completed successfully for ${env.BRANCH_NAME}"
             }
-            echo "✅ Pipeline completed successfully for ${env.BRANCH_NAME}"
         }
     }
 }
