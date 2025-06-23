@@ -1,9 +1,7 @@
 pipeline {
     agent any
-    triggers { pollSCM('*****') }
+    triggers { pollSCM('H/5 * * * *') }
     environment {
-        BRANCH_NAME = "${env.BRANCH_NAME}"
-        ENVIRONMENT = BRANCH_NAME == 'master' ? 'prod' : (BRANCH_NAME == 'dev' ? 'dev' : 'stage')
         REGISTRY = "localhost:8083"
         IMAGE_NAME_FRONT = "idz-unidep-front"
         IMAGE_NAME_BACK = "idz-unidep-back"
@@ -18,16 +16,23 @@ pipeline {
     }
 
     stages {
+        stage('Init') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == 'master') {
+                        env.ENVIRONMENT = 'prod'
+                    } else if (env.BRANCH_NAME == 'stage') {
+                        env.ENVIRONMENT = 'stage'
+                    } else {
+                        env.ENVIRONMENT = 'dev'
+                    }
+                    echo "🔧 Окружение: ${env.ENVIRONMENT}"
+                }
+            }
+        }
         stage('Checkout') {
             steps {
                 checkout scm
-            }
-        }
-        stage('Build') {
-            steps {
-                script {
-                    sh "docker compose build"
-                }
             }
         }
         stage('SonarQube Analysis') {
@@ -70,9 +75,6 @@ pipeline {
                         }
                     }
                 }
-            }
-            steps {
-                sh 'docker build -t $IMAGE:$TAG ./FastApi'
             }
         }
         stage('Trivy Scan') {
@@ -117,7 +119,7 @@ pipeline {
         }
         stage("Deploy"){
             when {
-                branch 'main'
+                branch 'master'
             }
             steps {
                 echo "🚀 Deploying to production"
@@ -138,9 +140,9 @@ pipeline {
     post {
         failure {
             script {
-                def msg = "❌ Jenkins pipeline failed in *${env.STAGE_NAME}* ($BRANCH_NAME)"
+                def msg = "❌ Jenkins pipeline failed in *${env.STAGE_NAME}* (${env.BRANCH_NAME})"
                 sh """
-                    curl -s -X POST https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage \\
+                    curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
                         -d chat_id=${TELEGRAM_CHAT_ID} \\
                         -d parse_mode=Markdown \\
                         -d text="${msg}"
@@ -150,15 +152,15 @@ pipeline {
         }
         success {
             script {
-                def msg = "✅ Jenkins pipeline completed successfully for $BRANCH_NAME"
+                def msg = "✅ Jenkins pipeline completed successfully for ${env.BRANCH_NAME}"
                 sh """
-                    curl -s -X POST https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage \\
+                    curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
                         -d chat_id=${TELEGRAM_CHAT_ID} \\
                         -d parse_mode=Markdown \\
                         -d text="${msg}"
                 """
             }
-            echo "✅ Pipeline completed successfully for $BRANCH_NAME"
+            echo "✅ Pipeline completed successfully for ${env.BRANCH_NAME}"
         }
     }
 }
