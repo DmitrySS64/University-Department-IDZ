@@ -6,6 +6,7 @@ pipeline {
         IMAGE_NAME_FRONT = "idz-unidep-front"
         IMAGE_NAME_BACK = "idz-unidep-back"
         IMAGE_TAG = "latest"
+        SONARQUBE_SERVER = "sonarqube"
         SONARQUBE_PROJECT_BACK = 'consultant-back'
         SONARQUBE_PROJECT_FRONT = 'consultant-front'
         SONAR_HOST_URL = "http://localhost:9000"
@@ -141,24 +142,24 @@ pipeline {
         failure {
             script {
                 def msg = "❌ Jenkins pipeline failed in *${env.STAGE_NAME}* (${env.BRANCH_NAME})"
-                sh """
+                sh '''
                     curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
                         -d chat_id=${TELEGRAM_CHAT_ID} \\
                         -d parse_mode=Markdown \\
                         -d text="${msg}"
-                """
+                '''
             }
             echo '❌ Build or push failed.'
         }
         success {
             script {
                 def msg = "✅ Jenkins pipeline completed successfully for ${env.BRANCH_NAME}"
-                sh """
+                sh '''
                     curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
                         -d chat_id=${TELEGRAM_CHAT_ID} \\
                         -d parse_mode=Markdown \\
                         -d text="${msg}"
-                """
+                '''
             }
             echo "✅ Pipeline completed successfully for ${env.BRANCH_NAME}"
         }
