@@ -1,6 +1,9 @@
 pipeline {
     agent any
     triggers { pollSCM('H/5 * * * *') }
+    tools {
+        sonarQube 'SonarScanner'
+    }
     environment {
         REGISTRY = "localhost:8083"
         IMAGE_NAME_FRONT = "idz-unidep-front"
