@@ -3,7 +3,7 @@ pipeline {
     triggers { pollSCM('H/5 * * * *') }
     environment {
         REGISTRY = "localhost:8083"
-        IMAGE_DICTIONARY = "UniDep"
+        IMAGE_DICTIONARY = "unidep"
         IMAGE_FRONT = "nginx"
         IMAGE_BACK = "backend"
         SONARQUBE_SERVER = "sonarqube"
