@@ -7,6 +7,7 @@ pipeline {
         IMAGE_NAME_BACK = "idz-unidep-back"
         IMAGE_TAG = "latest"
         SONARQUBE_SERVER = "sonarqube"
+        SONARSCANNER = "SonarScanner"
         SONARQUBE_PROJECT_BACK = 'consultant-back'
         SONARQUBE_PROJECT_FRONT = 'consultant-front'
         SONAR_HOST_URL = "http://localhost:9000"
@@ -37,12 +38,15 @@ pipeline {
             }
         }
         stage('SonarQube Analysis') {
+            environment {
+                scannerHome = tool "${SONARSCANNER}"
+            }
             parallel {
                 stage('Backend Analysis') {
                     steps {
-                        withSonarQubeEnv("${SONARQUBE_SERVER}") {
+                        withSonarQubeEnv(installationName: 'sonarqube') {
                             dir('FastApi') {
-                                sh 'sonar-scanner -Dproject.settings=../sonar-project.backend.properties'
+                                sh "${SONARSCANNER}/bin/sonar-scanner sonar-scanner -Dproject.settings=../sonar-project.backend.properties"
                             }
                         }
                     }
@@ -50,9 +54,9 @@ pipeline {
 
                 stage('Frontend Analysis') {
                     steps {
-                        withSonarQubeEnv("${SONARQUBE_SERVER}") {
+                        withSonarQubeEnv(installationName: "${SONARQUBE_SERVER}") {
                             dir('idz-unidep-front-app') {
-                                sh 'sonar-scanner -Dproject.settings=../sonar-project.frontend.properties'
+                                sh "${SONARSCANNER}/bin/sonar-scanner -Dproject.settings=../sonar-project.frontend.properties"
                             }
                         }
                     }
