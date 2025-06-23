@@ -14,7 +14,7 @@ pipeline {
         SONAR_TOKEN = credentials('sonar_token')
         NEXUS_CREDENTIALS_ID = 'nexus_jenkins'
         TELEGRAM_API=credentials('telegram_bot_api')
-        TELEGRAM_CHAT_ID='1098197545'
+        TELEGRAM_CHAT_ID='-1002584032525'
     }
 
     stages {
@@ -159,7 +159,7 @@ pipeline {
         failure {
             script {
                 def stage = env.STAGE_NAME ?: 'Unknown'
-                def msg = "❌ Jenkins pipeline failed in *${env.CURRENT_STAGE}* (branch: ${env.BRANCH_NAME})"
+                def msg = "❌ Jenkins pipeline *${env.JOB_NAME}* failed in *${env.CURRENT_STAGE}* (branch: ${env.BRANCH_NAME})"
                 if (msg?.trim()) {
                     sh """
                         curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
@@ -175,7 +175,7 @@ pipeline {
         }
         success {
             script {
-                def msg = "✅ Jenkins pipeline completed successfully for ${env.BRANCH_NAME}"
+                def msg = "✅ Jenkins pipeline *${env.JOB_NAME}* completed successfully for ${env.BRANCH_NAME}"
                 if (msg?.trim()) {
                     sh """
                         curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
