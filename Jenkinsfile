@@ -46,7 +46,7 @@ pipeline {
                     steps {
                         withSonarQubeEnv(installationName: 'sonarqube') {
                             dir('FastApi') {
-                                sh "${SONARSCANNER}/bin/sonar-scanner -Dproject.settings=../sonar-project.backend.properties"
+                                sh "${scannerHome}/bin/sonar-scanner -Dproject.settings=../sonar-project.backend.properties"
                             }
                         }
                     }
@@ -59,7 +59,7 @@ pipeline {
                     steps {
                         withSonarQubeEnv(installationName: "${SONARQUBE_SERVER}") {
                             dir('idz-unidep-front-app') {
-                                sh "${SONARSCANNER}/bin/sonar-scanner -Dproject.settings=../sonar-project.frontend.properties"
+                                sh "${scannerHome}/bin/sonar-scanner -Dproject.settings=../sonar-project.frontend.properties"
                             }
                         }
                     }
@@ -103,7 +103,7 @@ pipeline {
         stage('Push to Registry') {
             when {
                 anyOf {
-                    branch 'main'
+                    branch 'master'
                     branch 'dev'
                 }
             }
