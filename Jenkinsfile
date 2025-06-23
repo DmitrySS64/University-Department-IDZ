@@ -3,13 +3,13 @@ pipeline {
     triggers { pollSCM('H/5 * * * *') }
     environment {
         REGISTRY = "localhost:8083"
-        IMAGE_NAME_FRONT = "idz-unidep-front"
-        IMAGE_NAME_BACK = "idz-unidep-back"
-        IMAGE_TAG = "latest"
+        IMAGE_DICTIONARY = "UniDep"
+        IMAGE_FRONT = "nginx"
+        IMAGE_BACK = "backend"
         SONARQUBE_SERVER = "sonarqube"
         SONARSCANNER = "SonarScanner"
-        SONARQUBE_PROJECT_BACK = 'consultant-back'
-        SONARQUBE_PROJECT_FRONT = 'consultant-front'
+        SONARQUBE_PROJECT_BACK = "${IMAGE_DICTIONARY}-back"
+        SONARQUBE_PROJECT_FRONT = "${IMAGE_DICTIONARY}-front"
         SONAR_HOST_URL = "http://localhost:9000"
         SONAR_TOKEN = credentials('sonar_token')
         NEXUS_CREDENTIALS_ID = 'nexus_jenkins'
@@ -77,7 +77,7 @@ pipeline {
                     steps {
                         script { env.CURRENT_STAGE = 'Build Backend Image' }
                         dir('FastApi') {
-                            sh 'docker build -t backend .'
+                            sh 'docker build -t ${IMAGE_BACK} .'
                         }
                     }
                 }
@@ -86,7 +86,7 @@ pipeline {
                     steps {
                         script { env.CURRENT_STAGE = 'Build Frontend Image' }
                         dir('idz-unidep-front-app') {
-                            sh 'docker build -t nginx .'
+                            sh 'docker build -t ${IMAGE_FRONT} .'
                         }
                     }
                 }
@@ -97,13 +97,13 @@ pipeline {
                 stage('Scan Backend') {
                     steps {
                         script { env.CURRENT_STAGE = 'Scan Backend' }
-                        sh 'trivy image --exit-code 1 backend || true'
+                        sh 'trivy image --exit-code 1 ${IMAGE_BACK} || true'
                     }
                 }
                 stage('Scan Frontend') {
                     steps {
                         script { env.CURRENT_STAGE = 'Scan Frontend' }
-                        sh 'trivy image --exit-code 1 nginx || true'
+                        sh 'trivy image --exit-code 1 ${IMAGE_FRONT} || true'
                     }
                 }
             }
@@ -125,11 +125,11 @@ pipeline {
                         sh '''
                             echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin
 
-                            docker tag backend ${REGISTRY}/consultant-platform/backend:${ENVIRONMENT}
-                            docker push ${REGISTRY}/consultant-platform/backend:${ENVIRONMENT}
+                            docker tag ${IMAGE_BACK} ${REGISTRY}/${IMAGE_DICTIONARY}/${IMAGE_BACK}:${ENVIRONMENT}
+                            docker push ${REGISTRY}/${IMAGE_DICTIONARY}/${IMAGE_BACK}:${ENVIRONMENT}
 
-                            docker tag nginx ${REGISTRY}/consultant-platform/nginx:${ENVIRONMENT}
-                            docker push ${REGISTRY}/consultant-platform/nginx:${ENVIRONMENT}
+                            docker tag ${IMAGE_FRONT} ${REGISTRY}/${IMAGE_DICTIONARY}/${IMAGE_FRONT}:${ENVIRONMENT}
+                            docker push ${REGISTRY}/${IMAGE_DICTIONARY}/${IMAGE_FRONT}:${ENVIRONMENT}
                         '''
                     }
                 }
