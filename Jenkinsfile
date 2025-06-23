@@ -20,6 +20,8 @@ pipeline {
     stages {
         stage('Init') {
             steps {
+                script { currentBuild.displayName = "#${BUILD_NUMBER}" }
+                script { env.CURRENT_STAGE = 'Init' }
                 script {
                     if (env.BRANCH_NAME == 'master') {
                         env.ENVIRONMENT = 'prod'
@@ -34,6 +36,7 @@ pipeline {
         }
         stage('Checkout') {
             steps {
+                script { env.CURRENT_STAGE = 'Checkout' }
                 checkout scm
             }
         }
@@ -44,6 +47,7 @@ pipeline {
                         scannerHome = tool "${SONARSCANNER}"
                     }
                     steps {
+                        script { env.CURRENT_STAGE = 'Backend Analysis' }
                         withSonarQubeEnv(installationName: 'sonarqube') {
                             dir('FastApi') {
                                 sh "${scannerHome}/bin/sonar-scanner -Dproject.settings=../sonar-project.backend.properties"
@@ -57,6 +61,7 @@ pipeline {
                         scannerHome = tool "${SONARSCANNER}"
                     }
                     steps {
+                        script { env.CURRENT_STAGE = 'Frontend Analysis' }
                         withSonarQubeEnv(installationName: "${SONARQUBE_SERVER}") {
                             dir('idz-unidep-front-app') {
                                 sh "${scannerHome}/bin/sonar-scanner -Dproject.settings=../sonar-project.frontend.properties"
@@ -70,6 +75,7 @@ pipeline {
             parallel {
                 stage('Build Backend Image') {
                     steps {
+                        script { env.CURRENT_STAGE = 'Build Backend Image' }
                         dir('FastApi') {
                             sh 'docker build -t backend .'
                         }
@@ -78,6 +84,7 @@ pipeline {
 
                 stage('Build Frontend Image') {
                     steps {
+                        script { env.CURRENT_STAGE = 'Build Frontend Image' }
                         dir('idz-unidep-front-app') {
                             sh 'docker build -t nginx .'
                         }
@@ -89,11 +96,13 @@ pipeline {
             parallel {
                 stage('Scan Backend') {
                     steps {
+                        script { env.CURRENT_STAGE = 'Scan Backend' }
                         sh 'trivy image --exit-code 1 backend || true'
                     }
                 }
                 stage('Scan Frontend') {
                     steps {
+                        script { env.CURRENT_STAGE = 'Scan Frontend' }
                         sh 'trivy image --exit-code 1 nginx || true'
                     }
                 }
@@ -109,17 +118,18 @@ pipeline {
             }
             steps {
                 script {
+                    script { env.CURRENT_STAGE = 'Push to Registry' }
                     withCredentials([
                         usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
                     ]) {
                         sh '''
                             echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin
 
-                            docker tag backend ${REGISTRY}/consultant-platform/backend:${params.ENVIRONMENT}
-                            docker push ${REGISTRY}/consultant-platform/backend:${params.ENVIRONMENT}
+                            docker tag backend ${REGISTRY}/consultant-platform/backend:${ENVIRONMENT}
+                            docker push ${REGISTRY}/consultant-platform/backend:${ENVIRONMENT}
 
-                            docker tag nginx ${REGISTRY}/consultant-platform/nginx:${params.ENVIRONMENT}
-                            docker push ${REGISTRY}/consultant-platform/nginx:${params.ENVIRONMENT}
+                            docker tag nginx ${REGISTRY}/consultant-platform/nginx:${ENVIRONMENT}
+                            docker push ${REGISTRY}/consultant-platform/nginx:${ENVIRONMENT}
                         '''
                     }
                 }
@@ -149,7 +159,7 @@ pipeline {
         failure {
             script {
                 def stage = env.STAGE_NAME ?: 'Unknown'
-                def msg = "❌ Jenkins pipeline failed in *${stage}* (branch: ${env.BRANCH_NAME})"
+                def msg = "❌ Jenkins pipeline failed in *${env.CURRENT_STAGE}* (branch: ${env.BRANCH_NAME})"
                 if (msg?.trim()) {
                     sh """
                         curl -s -X POST https://api.telegram.org/bot${TELEGRAM_API}/sendMessage \\
