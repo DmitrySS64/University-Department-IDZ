@@ -3,7 +3,7 @@ pipeline {
     triggers { pollSCM('*****') }
     environment {
         BRANCH_NAME = "${env.BRANCH_NAME}"
-        ENVIRONMENT = BRANCH_NAME == 'main' ? 'prod' : (BRANCH_NAME == 'dev' ? 'dev' : 'stage')
+        ENVIRONMENT = BRANCH_NAME == 'master' ? 'prod' : (BRANCH_NAME == 'dev' ? 'dev' : 'stage')
         REGISTRY = "localhost:8083"
         IMAGE_NAME_FRONT = "idz-unidep-front"
         IMAGE_NAME_BACK = "idz-unidep-back"
