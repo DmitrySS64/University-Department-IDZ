@@ -1,0 +1,74 @@
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY = "localhost:8083"
+        IMAGE = "idz-unidep-back"
+        IMAGE_TAG = "latest"
+        SONAR_PROJECT_KEY = "idz-unidep"
+        SONAR_HOST_URL = "http://localhost:9000"
+        SONAR_TOKEN = credentials('sonar_token')
+        NEXUS_CREDENTIALS_ID = 'nexus_jenkins'
+        TELEGRAM_API=credentials('telegram_bot_api')
+        TELEGRAM_CHAT_ID='1098197545'
+    }
+
+    stages {
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('MySonarQube') {
+                    sh "sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.sources=FastApi -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN"
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t $IMAGE:$TAG ./FastApi'
+            }
+        }
+        stage('Scan Image with Trivy') {
+            steps {
+                sh 'trivy image $IMAGE:$TAG || true'
+            }
+        }
+        stage('Tag & Push to Nexus') {
+            steps {
+                script {
+                    withCredentials([
+                        usernamePassword(credentialsId: "${NEXUS_CREDENTIALS_ID}", usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')
+                    ]) {
+                        sh '''
+                            echo "$PASSWORD" | docker login ${REGISTRY} -u "$USERNAME" --password-stdin
+
+                            docker tag ${IMAGE_NAME_FRONT} ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
+                            docker push ${REGISTRY}/${IMAGE_NAME_FRONT}:${IMAGE_TAG}
+                        '''
+                    }
+                }
+            }
+        }
+        stage('Deploy to Server') {
+            steps {
+                sshagent(credentials: ['ssh_to_deploy_server']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no jenkins@192.168.1.38 '
+                            docker pull $REGISTRY/$IMAGE:$TAG && 
+                            docker stop $IMAGE || true && 
+                            docker rm $IMAGE || true && 
+                            docker run -d --name $IMAGE -p 8000:8000 192.168.1.40:8083/$IMAGE:$TAG
+                        '
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo '❌ Build or push failed.'
+        }
+        success {
+            echo '✅ Successfully built and pushed image to Nexus!'
+        }
+    }
+}
