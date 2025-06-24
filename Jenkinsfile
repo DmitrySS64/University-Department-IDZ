@@ -103,7 +103,7 @@ pipeline {
                         script { env.CURRENT_STAGE = 'Build Frontend Image' }
                         dir('idz-unidep-front-app') {
                             echo "⚙️ API_URL for build: ${API_URL}"
-                            sh "echo "VITE_API_URL=${API_URL}" > .env"
+                            sh "echo \"VITE_API_URL=${API_URL}\" > .env"
                             sh 'docker build -t ${IMAGE_FRONT} .'
                         }
                     }
